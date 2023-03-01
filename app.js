@@ -50,11 +50,6 @@ io.on("connection", (socket) => {
   });
 });
 
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
-});
-
 app.get("/", (req, res) => {
   res.status(200).send("Hello World");
 });
