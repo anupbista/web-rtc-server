@@ -26,10 +26,16 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("message", payload);
   });
   
- socket.on("send-call", (payload) => {
+ socket.on("send-audio-call", (payload) => {
   console.log("🚀 ~ payload:", payload);
 
-  socket.broadcast.emit("call", payload);
+  socket.broadcast.emit("audio-call", payload);
+});
+  
+  socket.on("send-video-call", (payload) => {
+  console.log("🚀 ~ payload:", payload);
+
+  socket.broadcast.emit("video-call", payload);
 });
 
   socket.on("disconnect", () => {
