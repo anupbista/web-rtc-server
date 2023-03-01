@@ -25,6 +25,12 @@ io.on("connection", (socket) => {
 
     socket.broadcast.emit("message", payload);
   });
+  
+ socket.on("send-call", (payload) => {
+  console.log("🚀 ~ payload:", payload);
+
+  socket.broadcast.emit("call", payload);
+});
 
   socket.on("disconnect", () => {
     console.log("user disconnected");
