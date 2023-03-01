@@ -43,6 +43,17 @@ io.on("connection", (socket) => {
   });
 });
 
+ socket.on("end-call", (payload) => {
+  console.log("🚀 ~ payload:", payload);
+
+  socket.broadcast.emit("call-ended", payload);
+});
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
+});
+
 app.get("/", (req, res) => {
   res.status(200).send("Hello World");
 });
