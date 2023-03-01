@@ -37,16 +37,17 @@ io.on("connection", (socket) => {
 
   socket.broadcast.emit("video-call", payload);
 });
+  
+   socket.on("end-call", (payload) => {
+  console.log("🚀 ~ payload:", payload);
+
+  socket.broadcast.emit("call-ended", payload);
+});
+
 
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
-});
-
- socket.on("end-call", (payload) => {
-  console.log("🚀 ~ payload:", payload);
-
-  socket.broadcast.emit("call-ended", payload);
 });
 
   socket.on("disconnect", () => {
