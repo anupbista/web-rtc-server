@@ -1,61 +1,41 @@
-const express = require("express");
-const http = require("http");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 
-const app = express();
-const server = http.createServer(app);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-const PORT = process.env.PORT || 4000;
-const ENVIRONMENT = process.env.ENVIRONMENT || "development";
-
-const io = require("socket.io")(server, {
+const httpServer = createServer();
+const io = new Server(httpServer, {
   cors: {
     origin: "*",
-    // origin: "http://localhost:4200",
-  },
+  }
 });
-const connectedListOfUsers = [];
-io.on("connection", (socket) => {
-  console.log(socket.handshake);
+io.on("connection", async (socket) => {
 
-  socket.on("send-message", (payload) => {
-    console.log("🚀 ~ payload:", payload);
-
-    socket.broadcast.emit("message", payload);
+  const sockets = await io.fetchSockets();
+  console.log("Joined user", socket.id);
+  io.sockets.emit("user-joined", {
+    id: socket.id, count: io.engine.clientsCount, sockets: sockets.map(k => k.id)
   });
-  
- socket.on("send-audio-call", (payload) => {
-  console.log("🚀 ~ payload:", payload);
 
-  socket.broadcast.emit("audio-call", payload);
-});
-  
-  socket.on("send-video-call", (payload) => {
-  console.log("🚀 ~ payload:", payload);
-
-  socket.broadcast.emit("video-call", payload);
-});
-  
-   socket.on("end-call", (payload) => {
-  console.log("🚀 ~ payload:", payload);
-
-  socket.broadcast.emit("call-ended", payload);
-});
-
-
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
+  socket.on('signal', async (payload) => {
+    console.log(payload);
+    const data = payload;
+    console.log(`From: ${socket.id} To: ${data.toId} Message: ${JSON.stringify(data.message)}`);
+    io.to(data.toId).emit('signal', {
+      id: socket.id,
+      message: data.message
+    });
   });
+
+  socket.on("message", (data) => {
+    io.sockets.emit("broadcast-message", {
+      id: socket.id,
+      data
+    });
+  });
+
+  socket.on('disconnect', () => {
+    io.sockets.emit("user-left", socket.id);
+  });
+
 });
 
-app.get("/", (req, res) => {
-  res.status(200).send("Hello World");
-});
-
-server.listen(PORT, () => {
-  console.log(
-    `${ENVIRONMENT} server running on http://localhost:${PORT}. Swagger on http://localhost:${PORT}/swagger `
-  );
-});
+httpServer.listen(3000);
